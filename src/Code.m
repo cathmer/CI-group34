@@ -7,10 +7,22 @@ clear all
 %% Initiliaze variables
 % Loads text files into matrices
 Features = importdata('features.txt');  % A list of 7854 arrays of inputs
-Targets = importdata('targets.txt');    % A list with outcomes corresponding to the inputs of Features
-Unknown = importdata('unknown.txt');    % A lit with inputs, with no outputs known
+% splits the input matrix into 10 even pieces
+FeaturesSplit = mat2cell(Features, [785,785,785,785,785,785,785,785,785,789], 10);
+% The last 10% of inputs is used as a test set and is converted back to a
+% regular matrix
+TestSet = cell2mat(FeaturesSplit(10));
 
-HIDDENNEURONS = 8;  % The number of hidden neurons we use
+Targets = importdata('targets.txt');    % A list with outcomes corresponding to the inputs of Features
+% Splits the targets into 10 even pieces
+TargetsSplit = mat2cell(Targets, [785,785,785,785,785,785,785,785,785,789], 1);
+% The last 10% of targets is used as a test set and is converted back to a
+% regular column vector
+TestTargets = cell2mat(TargetsSplit(10));
+
+Unknown = importdata('unknown.txt');    % A list with inputs, with no outputs known
+
+HIDDENNEURONS = 10;  % The number of hidden neurons we use
 alpha = 0.1;        % The learning curve we use
 
 % Generates a 10 by HIDDENNEURONS matrix with random weights values (between -2.4/10
@@ -19,7 +31,7 @@ alpha = 0.1;        % The learning curve we use
 inputWeights = (2.4/10 -(-2.4/10))*rand(10, HIDDENNEURONS) + (-2.4/10);
 % Generates a row vector with random treshold values between -2.4/10 and
 % 2.4/10. The j-th value corresponds to the j-th hidden neuron.
-tresholdHiddenNeurons = (2.4/10 -(-2.4/10))*rand(1, 8) + (-2.4/10);
+tresholdHiddenNeurons = (2.4/10 -(-2.4/10))*rand(1, HIDDENNEURONS) + (-2.4/10);
 
 % Generates a HIDDENNEURONS by 7 matrix with random weights values (between
 % -2.4/HIDDENNEURONS and 2.4/HIDDENNEURONS). The weight at position (j, k)
@@ -32,19 +44,40 @@ outputWeights = (2.4/HIDDENNEURONS -(-2.4/HIDDENNEURONS))*rand(HIDDENNEURONS, 7)
 tresholdOutputNeurons = (2.4/HIDDENNEURONS -(-2.4/HIDDENNEURONS))*rand(1, 7) + (-2.4/HIDDENNEURONS);
 
 % The number of times the complete training set will be looped through
-EPOCHS = 50;
+EPOCHS = 20;
 % An array, initliazed with all zeros, which will contain the Mean Squared
 % Error of each epoch
-allErrors = zeros(EPOCHS, 1);
+allErrors = [];
 
 %% The learning-phase starts here
 % The number of times one epoch is executed
 for iterations = 1: EPOCHS
     errorsSquared = 0;  % This variable will hold the total of all errorsquared in one Epoch.
     
+    % Generate a random integer between 1 and 9 to determine which part of
+    % the Features will be the validation set
+    random = randi([1, 9]);
+    
+    % Assign the featuressplit and targetssplit to new variables, so the
+    % original variables remain unchanged and can be reused each iteration
+    FeaturesSplit2 = FeaturesSplit;
+    TargetsSplit2 = TargetsSplit;
+    
+    % Create a validation set and convert it back to a matrix
+    ValidationSet = cell2mat(FeaturesSplit2(random));
+    % Create validation targets
+    ValidationTargets = cell2mat(TargetsSplit2(random));
+    % Remove the validation set from the features and targets
+    FeaturesSplit2(random) = [];
+    TargetsSplit2(random) = [];
+    % Create a trainingset and targets for this set
+    TrainingSet = cell2mat(FeaturesSplit2);
+    TrainingTargets = cell2mat(TargetsSplit2);
+    
+    %% Training
     % This loop runs through all the training inputs
-    for n = 1: size(Features,1)
-        input = Features(n,:);  % The current row of the input matrix
+    for n = 1: size(TrainingSet,1)
+        input = TrainingSet(n,:);  % The current row of the input matrix
         
         % Calculates the values in the hidden neurons, before activation.
         hiddenLayerNeurons = (input * inputWeights) - tresholdHiddenNeurons; 
@@ -61,7 +94,7 @@ for iterations = 1: EPOCHS
         % Takes the current Target, and converts it to a vector with a 1 on
         % the index corresponding to the Target, and a zero on all other
         % spots.
-        desiredOutput = ind2vec(Targets(n), 7);
+        desiredOutput = ind2vec(TrainingTargets(n), 7);
         
         % Calculates a column vector with the error for each output neuron
         errors = desiredOutput - output;
@@ -112,14 +145,49 @@ for iterations = 1: EPOCHS
         
         % Calculates the sum of all errors squared for the current output
         % and ads it to errorsSquared
+        %for e=1: size(errors)
+        %    errorsSquared = errorsSquared + (errors(e)^2);
+        %end
+    end
+    
+    %% Validation
+    % This loop runs through all the validation inputs
+    for n = 1: size(ValidationSet,1)
+        input = ValidationSet(n,:);  % The current row of the input matrix
+        
+        % Calculates the values in the hidden neurons, before activation.
+        hiddenLayerNeurons = (input * inputWeights) - tresholdHiddenNeurons; 
+        % Calculates the output values of the hidden neurons.
+        hiddenNeuronsOutput = sigmf(hiddenLayerNeurons, [1 0]);
+        
+        % Calculates the values in the output neurons, before
+        % activation(i.e. sigmoid)
+        outputNeurons = (hiddenNeuronsOutput*outputWeights) - tresholdOutputNeurons;
+        % Calculates the output values of the output neurons and transposes
+        % the vector to a column vector
+        output = transpose(sigmf(outputNeurons, [1 0]));
+        
+        % Takes the current Target, and converts it to a vector with a 1 on
+        % the index corresponding to the Target, and a zero on all other
+        % spots.
+        desiredOutput = ind2vec(ValidationTargets(n), 7);
+        
+        % Calculates a column vector with the error for each output neuron
+        errors = desiredOutput - output;
+        
+        % Calculates the sum of all errors squared for the current output
+        % and ads it to errorsSquared
         for e=1: size(errors)
             errorsSquared = errorsSquared + (errors(e)^2);
         end
     end
     
+    %% Calculate if error of last Epoch is low enough to stop
     % Calculate the mean squared error of the last Epoch
-    MSE = 1/size(Features,1)*errorsSquared;
+    MSE = 1/size(ValidationSet,1)*errorsSquared;
+    
     disp(MSE);
+    disp(iterations);
     
     % Add the MSE to a vector containing all MSE's for all epochs
     allErrors(iterations) = MSE;
@@ -130,5 +198,44 @@ for iterations = 1: EPOCHS
     end
 end
 
-% Plot all the MSE's
+%% Plot all the MSE's
 plot(allErrors);
+
+%% Test the results against a test set, which has not been used previously
+% This loop runs through all the test inputs
+errorsSquared = 0;
+
+for n = 1: size(TestSet,1)
+    input = TestSet(n,:);  % The current row of the input matrix
+
+    % Calculates the values in the hidden neurons, before activation.
+    hiddenLayerNeurons = (input * inputWeights) - tresholdHiddenNeurons; 
+    % Calculates the output values of the hidden neurons.
+    hiddenNeuronsOutput = sigmf(hiddenLayerNeurons, [1 0]);
+
+    % Calculates the values in the output neurons, before
+    % activation(i.e. sigmoid)
+    outputNeurons = (hiddenNeuronsOutput*outputWeights) - tresholdOutputNeurons;
+    % Calculates the output values of the output neurons and transposes
+    % the vector to a column vector
+    output = transpose(sigmf(outputNeurons, [1 0]));
+
+    % Takes the current Target, and converts it to a vector with a 1 on
+    % the index corresponding to the Target, and a zero on all other
+    % spots.
+    desiredOutput = ind2vec(TestTargets(n), 7);
+
+    % Calculates a column vector with the error for each output neuron
+    errors = desiredOutput - output;
+
+    % Calculates the sum of all errors squared for the current output
+    % and ads it to errorsSquared
+    for e=1: size(errors)
+        errorsSquared = errorsSquared + (errors(e)^2);
+    end
+end
+
+% Calculate the MSE of the test set and display it
+MSE = 1/size(TestSet,1)*errorsSquared;
+disp('MSE of Test Set: ');
+disp(MSE);
