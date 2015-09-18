@@ -69,7 +69,7 @@ MSEsum = 0;
     % Error of each epoch
     allErrors = [];
     allErrorsTraining = [];
-    totalSuccessRate = 0;
+    totalSuccessRate
 
     %% The learning-phase starts here
     % The number of times one epoch is executed
