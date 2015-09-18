@@ -1,0 +1,19 @@
+HIDDENNEURONS = 30
+MSE of Test Set: 0.1057
+MSE average: 0.1132
+
+HIDDENNEURONS = 10
+MSE of Test Set: 0.1069
+MSE average: 0.1187
+
+HIDDENNEURONS = 25
+MSE of Test Set: 0.1012
+MSE average: 0.1150
+
+HIDDENNEURONS = 20
+MSE of Test Set: 0.1010
+MSE average: 0.1142
+
+HIDDENNEURONS = 18
+MSE of Test Set: 0.1040
+MSE average: 0.1152
