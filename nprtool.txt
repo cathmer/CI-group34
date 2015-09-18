@@ -1,0 +1,5 @@
+nprtool settings:
+Hidden neurons = 20
+70% Training
+15% Validation
+15% Testing
