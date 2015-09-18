@@ -40,7 +40,7 @@ for kfold=1: 10
     % Remove the test targets from the features
     TargetsSplit1(kfold) = [];
 
-    HIDDENNEURONS = 30;  % The number of hidden neurons we use
+    HIDDENNEURONS = 19;  % The number of hidden neurons we use
     alpha = 0.1;        % The learning curve we use
 
     % Generates a 10 by HIDDENNEURONS matrix with random weights values (between -2.4/10
