@@ -277,7 +277,11 @@ MSEsum = 0;
             errorsSquared = errorsSquared + (errors(e)^2);
         end
         
+        % Classification is a number, which represents the output our
+        % network predicts for the given input
         classification = vec2ind(output);
+        % If our classification equals the actual output, add 1 to the
+        % successcount
         if classification == TestTargets(n)
             successCount = successCount + 1;
         end
