@@ -1,5 +1,14 @@
 %% This script learns to identify target classes based on 10 input variables
 % Made by group 34 CI
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOTE: We used k-fold cross validation to find out what the best amount of
+% hidden neurons is, so for this we needed a for loop that runs 10 times (in our case). 
+% After we found out what the best amount of hidden neurons is, we didn't
+% need it anymore, but the code is still in here, however the for loop is
+% commented out
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 % Clear the console and all variables before running
 clc
 clear all
@@ -65,8 +74,7 @@ MSEsum = 0;
 
     % The number of times the complete training set will be looped through
     EPOCHS = 20;
-    % An array, initliazed with all zeros, which will contain the Mean Squared
-    % Error of each epoch
+    % An array which will contain the Mean Squared Error of each epoch
     allErrors = [];
     allErrorsTraining = [];
     totalSuccessRate = 0;
@@ -172,12 +180,15 @@ MSEsum = 0;
             end
         end
         
+        % Calculates the MSE of the current epoch of the training set and
+        % adds it to a vector
         MSE = 1/size(TrainingSet,1)*errorsSquared;
-        
         allErrorsTraining(iterations) = MSE;
+        errorsSquared = 0;
 
         %% Validation
-        
+        % variable which keeps track of the number of times the validation
+        % set correctly predicts the output
         successCount = 0;
         % This loop runs through all the validation inputs
         for n = 1: size(ValidationSet,1)
@@ -209,34 +220,40 @@ MSEsum = 0;
                 errorsSquared = errorsSquared + (errors(e)^2);
             end
             
+            % Classification is a number, which represents the output our
+            % network predicts for the given input
             classification = vec2ind(output);
+            % If our classification equals the actual output, add 1 to the
+            % successcount
             if classification == ValidationTargets(n)
                 successCount = successCount + 1;
             end
         end
+        
         %% Calculate if error of last Epoch is low enough to stop
         % Calculate the mean squared error of the last Epoch
         MSE = 1/size(ValidationSet,1)*errorsSquared;
-        
-        disp('MSE; iterations; k');
-        disp(MSE);
+        disp('iterations, MSE');
         disp(iterations);
-        disp(kfold);
+        disp(MSE);
 
         % Add the MSE to a vector containing all MSE's for all epochs
         allErrors(iterations) = MSE;
 
         % Stop if the MSE of the last epoch is smaller than 0.1
-        if MSE < 0.1
+        if MSE < 0.01
             break;
         end
         
+        % Calculate the success rate of this validation, and add it to the
+        % total
         successRate = successCount / size(ValidationSet,1);
         totalSuccessRate = totalSuccessRate + successRate;
     end
     
+    % display the average success rate of the validation set
     disp('averagee success rate validation: ');
-    totalSuccessRate / iterations
+    validationSuccessRate = totalSuccessRate / iterations
     
     %% Plot all the MSE's
     plot(allErrors);
@@ -245,7 +262,7 @@ MSEsum = 0;
     %% Test the results against a test set, which has not been used previously
     % This loop runs through all the test inputs
     errorsSquared = 0;
-    
+    % variable to keep track of the count of successfull predictions
     successCount = 0;
     
     for n = 1: size(TestSet,1)
@@ -277,24 +294,52 @@ MSEsum = 0;
             errorsSquared = errorsSquared + (errors(e)^2);
         end
         
+        % Classification is a number, which represents the output our
+        % network predicts for the given input
         classification = vec2ind(output);
+        % If our classification equals the actual output, add 1 to the
+        % successcount
         if classification == TestTargets(n)
             successCount = successCount + 1;
         end
     end
     
+    % Displays the success rate of the testing set
     disp('succes rate testing: ');
     successRate = successCount / size(TestSet,1)
     
     % Calculate the MSE of the test set and display it
     MSE = 1/size(TestSet,1)*errorsSquared;
-    disp('MSE of Test Set: ');
-    disp(MSE);
     
     % Add the MSE of the last test set to the total of MSE's
     MSEsum = MSEsum + MSE;
 %end
 
+% The average of all MSE's throughout the 10 folds
 MSEaverage = MSEsum/kfold;
-disp('MSE average: ');
-disp(MSEaverage);
+
+% empty array which will store results
+results = [];
+
+for n = 1: size(Unknown,1)
+    input = Unknown(n,:);  % The current row of the input matrix
+
+    % Calculates the values in the hidden neurons, before activation.
+    hiddenLayerNeurons = (input * inputWeights) - tresholdHiddenNeurons; 
+    % Calculates the output values of the hidden neurons.
+    hiddenNeuronsOutput = sigmf(hiddenLayerNeurons, [1 0]);
+
+    % Calculates the values in the output neurons, before
+    % activation(i.e. sigmoid)
+    outputNeurons = (hiddenNeuronsOutput*outputWeights) - tresholdOutputNeurons;
+    % Calculates the output values of the output neurons and transposes
+    % the vector to a column vector
+    output = transpose(sigmf(outputNeurons, [1 0]));
+    
+    % This stores the current classification in an array with all results,
+    % which will be written to a file afterwards
+    results(n) = vec2ind(output);
+end
+
+% writes the classifications of all unknown inputs to a file
+dlmwrite('unknown_classifications.txt', results);
