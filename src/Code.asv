@@ -323,7 +323,7 @@ MSEsum = 0;
     % the results our own net gives on the test-values are compared
     % with the given results of the test set
     
-    plotconfusion(ind2vec(transpose(TestTargets),7),ind2vec(Class,7));
+    plotconfusion(ind2vec(transpose(TestTargets),7),ind2vec(Class));
 %end
 
 % The average of all MSE's throughout the 10 folds
