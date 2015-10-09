@@ -2,12 +2,12 @@ clc;
 clear all;
 
 % Read the file into a matrix
-A = dlmread('insane maze.txt');
+A = dlmread('hard maze.txt');
 % Take out the top row of the matrix (which only represent the size --> see
 % file). What remains, represents the maze
 Maze = A(2:size(A,1), 1:size(A,2));
 
-fileID = fopen('insane coordinates.txt'); 
+fileID = fopen('hard coordinates.txt'); 
 % Read the coordinates into a vector
 C = fscanf(fileID, '%d %s %d %s');
 fclose(fileID);
@@ -129,14 +129,10 @@ for i=1:MAX_ITERATIONS
         end
         
         routeLength = size(actions,2);
-        
-        % The number of pheromones that will be added to all the paths this
-        % ant has visited
+        % The number of pheromones that will be added 
         pherAddition = (PHEROMONES_DROPPED / routeLength);
-        
         currentRow = startRow;
         currentColumn = startColumn;
-        
         % Update the TempPerhNorth, south, east and west here based on the
         % actions 
         for k=1:routeLength
@@ -161,30 +157,20 @@ for i=1:MAX_ITERATIONS
             end
         end
         
-        % If the routelength of this ant is shorter than the length of
-        % shortestroute so far and is not 0 (which it is whene the ant got
-        % stuck), this route is considered the new shortestRoute.
         if (routeLength < size(shortestRoute,2) && routeLength > 0)
             shortestRoute = actions;
         end
         
-        % If the routelength is shorter than the convergence criterion,
-        % break
         if (routeLength < CONVERGENCE_CRITERION && routeLength > 0)
             break;
         end;
     end
     
-    % stop when the shortestroute is shorter than a predefined criterion
-    if (size(shortestRoute,2) < CONVERGENCE_CRITERION)
-        break;
-    end;
-    
     disp('Iteration: ');
     disp(i);
 end
 
-RESULT_FILE = 'insane_results.txt';
+RESULT_FILE = 'hard_results.txt';
 
 dlmwrite(RESULT_FILE, []);
 fileID = fopen(RESULT_FILE, 'wt'); 
