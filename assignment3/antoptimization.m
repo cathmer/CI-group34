@@ -2,12 +2,12 @@ clc;
 clear all;
 
 % Read the file into a matrix
-A = dlmread('insane maze.txt');
+A = dlmread('medium maze.txt');
 % Take out the top row of the matrix (which only represent the size --> see
 % file). What remains, represents the maze
 Maze = A(2:size(A,1), 1:size(A,2));
 
-fileID = fopen('insane coordinates.txt'); 
+fileID = fopen('medium coordinates.txt'); 
 % Read the coordinates into a vector
 C = fscanf(fileID, '%d %s %d %s');
 fclose(fileID);
@@ -22,11 +22,11 @@ MAX_ITERATIONS = 1000;
 ANTS_PER_ITERATION = 5;
 % This is a guess of the length of the route and is a multiplier for the
 % amounts of pheromomens that are dropped
-PHEROMONES_DROPPED = 250;
+PHEROMONES_DROPPED = 200;
 % The rate at which pheromones evaporate
 EVAPORATION_RATE = 0.1;
 % The route length for which the algorithm is satisfied
-CONVERGENCE_CRITERION = 100;
+CONVERGENCE_CRITERION = 250;
 % The alpha and beta of the probability function. Control the relative
 % influences of pheromones and path length
 ALPHA = 1;
@@ -180,11 +180,20 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
+    PherNorth = EVAPORATION_RATE .* PherNorth;
+    PherNorth = PherNorth + TempPherNorth;
+    PherWest = EVAPORATION_RATE .* PherWest;
+    PherWest = PherWest + TempPherWest;
+    PherEast = EVAPORATION_RATE .* PherEast;
+    PherEast = PherEast + TempPherEast;
+    PherSouth = EVAPORATION_RATE .* PherSouth;
+    PherSouth = PherSouth + TempPherSouth;
+    
     disp('Iteration: ');
     disp(i);
 end
 
-RESULT_FILE = 'insane_results.txt';
+RESULT_FILE = 'medium_results.txt';
 
 dlmwrite(RESULT_FILE, []);
 fileID = fopen(RESULT_FILE, 'wt'); 

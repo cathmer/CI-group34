@@ -1,21 +1,3 @@
-clc;
-clear all;
-
-% Read the file into a matrix
-A = dlmread('medium maze.txt');
-% Take out the top row of the matrix (which only represent the size --> see
-% file). What remains, represents the maze
-Maze = A(2:size(A,1), 1:size(A,2));
-
-fileID = fopen('medium coordinates.txt'); 
-% Read the coordinates into a vector
-C = fscanf(fileID, '%d %s %d %s');
-fclose(fileID);
-% The starting location
-startLoc = [C(1) C(3)];
-% The ending location
-endLoc = [C(5) C(7)];
-
 % Maximum # of iterations before the algorithm terminates
 MAX_ITERATIONS = 1000;
 % # of ants per iteration
@@ -180,20 +162,6 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
-    PherNorth = 
-    
     disp('Iteration: ');
     disp(i);
 end
-
-RESULT_FILE = 'medium_results.txt';
-
-dlmwrite(RESULT_FILE, []);
-fileID = fopen(RESULT_FILE, 'wt'); 
-results = [size(shortestRoute, 2), startLoc(1), startLoc(2)];
-formatSpec = '%d;\n%d, %d;\n';
-fprintf(fileID, formatSpec, results);
-fprintf(fileID, '%d;', shortestRoute);
-fclose(fileID);
-
-disp('Done!');

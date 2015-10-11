@@ -264,6 +264,9 @@ MSEsum = 0;
     errorsSquared = 0;
     % variable to keep track of the count of successfull predictions
     successCount = 0;
+    % Variable to store all the (desired) outputs in the 1 to N form
+    desiredOutputsMatrix = [];
+    outputsMatrix = [];
     
     for n = 1: size(TestSet,1)
         input = TestSet(n,:);  % The current row of the input matrix
@@ -284,6 +287,8 @@ MSEsum = 0;
         % the index corresponding to the Target, and a zero on all other
         % spots.
         desiredOutput = ind2vec(TestTargets(n), 7);
+        desiredOutputsMatrix = [desiredOutputsMatrix, desiredOutput];
+        outputsMatrix = [outputsMatrix, ind2vec(vec2ind(output),7)];
 
         % Calculates a column vector with the error for each output neuron
         errors = desiredOutput - output;
@@ -313,6 +318,8 @@ MSEsum = 0;
     
     % Add the MSE of the last test set to the total of MSE's
     MSEsum = MSEsum + MSE;
+    
+    plotconfusion(desiredOutputsMatrix, outputsMatrix);
 %end
 
 % The average of all MSE's throughout the 10 folds

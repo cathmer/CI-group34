@@ -1,20 +1,4 @@
-clc;
-clear all;
-
-% Read the file into a matrix
-A = dlmread('medium maze.txt');
-% Take out the top row of the matrix (which only represent the size --> see
-% file). What remains, represents the maze
-Maze = A(2:size(A,1), 1:size(A,2));
-
-fileID = fopen('medium coordinates.txt'); 
-% Read the coordinates into a vector
-C = fscanf(fileID, '%d %s %d %s');
-fclose(fileID);
-% The starting location
-startLoc = [C(1) C(3)];
-% The ending location
-endLoc = [C(5) C(7)];
+function route = antFunction(Maze, startColumn, startRow, endColumn, endRow)
 
 % Maximum # of iterations before the algorithm terminates
 MAX_ITERATIONS = 1000;
@@ -34,12 +18,6 @@ BETA = 0.5;
 
 % Vector which will store the actions of the shortest route
 shortestRoute = zeros(1, size(Maze,1) * size(Maze,2));
-
-% Starting and ending location converted to matrix coordinates
-startColumn = startLoc(1) + 1;
-startRow = startLoc(2) + 1;
-endColumn = endLoc(1) + 1;
-endRow = endLoc(2) + 1;
 
 % Matrices which contain pheromone values for each square in one particular
 % direction
@@ -180,20 +158,10 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
-    PherNorth = 
-    
     disp('Iteration: ');
     disp(i);
 end
 
-RESULT_FILE = 'medium_results.txt';
+route = shortestRoute;
 
-dlmwrite(RESULT_FILE, []);
-fileID = fopen(RESULT_FILE, 'wt'); 
-results = [size(shortestRoute, 2), startLoc(1), startLoc(2)];
-formatSpec = '%d;\n%d, %d;\n';
-fprintf(fileID, formatSpec, results);
-fprintf(fileID, '%d;', shortestRoute);
-fclose(fileID);
-
-disp('Done!');
+end
