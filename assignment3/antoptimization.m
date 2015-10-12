@@ -1,6 +1,9 @@
 clc;
 clear all;
 
+% File to which the results will be written
+RESULT_FILE = 'hard_results.txt';
+
 % Read the file into a matrix
 A = dlmread('hard maze.txt');
 % Take out the top row of the matrix (which only represent the size --> see
@@ -72,8 +75,6 @@ for i=1:MAX_ITERATIONS
         while ~(currentColumn == endColumn && currentRow == endRow)
             % Set the current location to 0, to indicate the ant has visited it
             TempMaze(currentRow, currentColumn) = 0;
-            
-            options = 0;
             
             % Determine the probabilities for each adjacent square
             if (currentRow == 1)
@@ -182,6 +183,8 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
+    % Evaporate some of the current pheromones. Afterwards, add the
+    % pheromones from the previous iteration.
     PherNorth = (1-EVAPORATION_RATE) .* PherNorth;
     PherNorth = PherNorth + TempPherNorth;
     PherWest = (1-EVAPORATION_RATE) .* PherWest;
@@ -195,8 +198,7 @@ for i=1:MAX_ITERATIONS
     disp(i);
 end
 
-RESULT_FILE = 'hard_results.txt';
-
+% write the results to file
 dlmwrite(RESULT_FILE, []);
 fileID = fopen(RESULT_FILE, 'wt'); 
 results = [size(shortestRoute, 2), startLoc(1), startLoc(2)];

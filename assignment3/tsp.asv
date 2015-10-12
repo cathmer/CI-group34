@@ -57,12 +57,12 @@ ITERATIONS = 50;
 STARTING_POPULATION = 20;
 % The number of people that are selected from the current population for
 % creating offspring. These are the people with the best fitness.
-TOP_SELECTION = 10;
-% Fitness = Fitness_Qoutient / Routelength. Used for scaling.
-FITNESS_QUOTIENT = 6400;
+TOP_SELECTION = 8;
+% Fitness = Fitness_Qoutient / Routelength
+FITNESS_QUOTIENT = 100;
 % The probability that two parents will use crossover to create offspring.
 % If not, they will be cloned
-CROSSOVER_PROB = 0.7;
+CROSSOVER_PROB = 0.8;
 % The probability that a child will be mutated.
 MUTATION_PROB = 0.01;
 
@@ -106,10 +106,8 @@ for n=1: ITERATIONS
     % routes from product to product. The lower the total route length, the
     % higher the fitness
     for i=1: STARTING_POPULATION
-        % Initialize fitness and total route length to 0
+        % Initialize fitness to 0
         fitness = 0;
-        totalRouteLength = 0;
-        
         % Starting and ending location converted to matrix coordinates
         startColumn = startLoc(1) + 1;
         startRow = startLoc(2) + 1;
@@ -152,7 +150,7 @@ for n=1: ITERATIONS
             % If true, the route doesn't need to be calculated again and
             % the fitness is immediately updated based on the routelength
             if containsRoute
-                totalRouteLength = totalRouteLength + routeLength;
+                fitness = fitness + (FITNESS_QUOTIENT / routeLength);
             % The route needs to be calculated
             else
                 % An array which will contain the shortestRoute
@@ -179,15 +177,15 @@ for n=1: ITERATIONS
                 end
                 
                 % calculate the routelength and use it to update the
-                % total route length
+                % fitness
                 routeLength = size(shortestRoute, 2);
-                totalRouteLength = totalRouteLength + routeLength;
+                fitness = fitness + (FITNESS_QUOTIENT / routeLength);
             end
         end
         
         % Update the PopulationFitness with the fitness of the current
         % person
-        PopulationFitness(i,1) = FITNESS_QUOTIENT / totalRouteLength;
+        PopulationFitness(i,1) = fitness;
     end
     
     disp('Population fitness: ');
@@ -290,28 +288,18 @@ for n=1: ITERATIONS
                 crossoverStart = ceil(rand()*productCount);
                 % The ending index of the crossover
                 crossoverEnd = ceil((productCount - crossoverStart)*rand()) + crossoverStart; 
-                % Arrays representing the children
+                % Arrays representing the child
                 child1 = zeros(1, productCount);
                 child2 = zeros(1, productCount);
-                % Arrays representing the parents
                 parent1 = Parents(1,:);
                 parent2 = Parents(2,:);
-                
-                % add the elements from index crossoverstart to index
-                % crossoverend from parent1 to child1. 
+
                 child1(crossoverStart:crossoverEnd) = parent1(crossoverStart:crossoverEnd);
-                
-                % In this for loop, child1 is filled with the elements from
-                % parent2 that it doesn't yet have, adding them in order.
                 parentIndex = 1;
                 for c=1:productCount
-                    % If c lies outside the crossover, it means the child
-                    % still needs an element on this position
                     if c < crossoverStart || c > crossoverEnd
                         addedEl = false;
-                        
-                        % Go through the elements of parent2 in order until
-                        % one is found that isn't in the child yet
+
                         while ~addedEl
                             if (sum(child1 == parent2(parentIndex)) == 0)
                                 child1(c) = parent2(parentIndex);
@@ -322,8 +310,7 @@ for n=1: ITERATIONS
                         end
                     end
                 end
-                
-                % Do the same as for child1, but with the parents switched
+
                 child2(crossoverStart:crossoverEnd) = parent2(crossoverStart:crossoverEnd);
                 parentIndex = 1;
                 for c=1:productCount
@@ -341,18 +328,13 @@ for n=1: ITERATIONS
                     end
                 end
                 
-                % For loop to determine for each child if it will be
-                % mutated
                 for m=1:2
-                    % Random number that determines if a child gets mutated
                     randMutation = rand();
             
                     if randMutation < MUTATION_PROB
-                        % Get two random indices
                         rand1 = ceil(18*rand());
                         rand2 = ceil(18*rand());
-                        
-                        % Swap the numbers belonging to the random indices
+
                         if m == 1
                             child1([rand1 rand2]) = child1([rand2 rand1]);
                         else
@@ -360,8 +342,7 @@ for n=1: ITERATIONS
                         end
                     end
                 end
-                
-                % Add the children to the new population
+
                 NewPopulation(h*2 - 1,:) = child1;
                 NewPopulation(h*2,:) = child2;
             else
@@ -369,7 +350,6 @@ for n=1: ITERATIONS
                 child1 = Parents(1,:);
                 child2 = Parents(2,:);
                 
-                % do the same as above, mutate children (possibly)
                 for m=1:2
                     randMutation = rand();
             
@@ -385,7 +365,6 @@ for n=1: ITERATIONS
                     end
                 end
                 
-                % Add the parents to the new population
                 NewPopulation(h*2 - 1,:) = child1;
                 NewPopulation(h*2,:) = child2;
             end
@@ -393,7 +372,7 @@ for n=1: ITERATIONS
     end
 end
     
-% Calculates the index of the person with the highest fitness
+
 for i=1:size(PopulationFitness,1)
     if i == 1
         highestFitnessIndex = 1;
@@ -404,13 +383,9 @@ for i=1:size(PopulationFitness,1)
     end
 end
 
-% Array which will store the complete route
 completeRoute = [];
-% The person with the highest fitness
 parent = Population(highestFitnessIndex,:);
 
-% Loop through the route from product to product for this person, to
-% calculate the length of the entire route.
 for j=1:productCount
     if (j == 1)
         startColumn = startLoc(1) + 1;
@@ -440,8 +415,6 @@ results = [size(completeRoute, 2) + productCount, startLoc(1), startLoc(2)];
 formatSpec = '%d;\n%d, %d;\n';
 fprintf(fileID, formatSpec, results);
 
-% Loop through the route from product to product for this person, to write
-% it to file
 for j=1:productCount
     if (j == 1)
         startColumn = startLoc(1) + 1;

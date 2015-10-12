@@ -6,7 +6,7 @@ MAX_ITERATIONS = 500;
 ANTS_PER_ITERATION = 5;
 % This is a guess of the length of the route and is a multiplier for the
 % amounts of pheromomens that are dropped
-PHEROMONES_DROPPED = 1300;
+PHEROMONES_DROPPED = 1000;
 % The rate at which pheromones evaporate
 EVAPORATION_RATE = 0.1;
 % The route length for which the algorithm is satisfied
