@@ -1,16 +1,16 @@
 function route = antFunction(Maze, startColumn, startRow, endColumn, endRow)
 
 % Maximum # of iterations before the algorithm terminates
-MAX_ITERATIONS = 1000;
+MAX_ITERATIONS = 500;
 % # of ants per iteration
 ANTS_PER_ITERATION = 5;
 % This is a guess of the length of the route and is a multiplier for the
 % amounts of pheromomens that are dropped
-PHEROMONES_DROPPED = 250;
+PHEROMONES_DROPPED = 1300;
 % The rate at which pheromones evaporate
 EVAPORATION_RATE = 0.1;
 % The route length for which the algorithm is satisfied
-CONVERGENCE_CRITERION = 250;
+CONVERGENCE_CRITERION = 200;
 % The alpha and beta of the probability function. Control the relative
 % influences of pheromones and path length
 ALPHA = 1;
@@ -51,11 +51,13 @@ for i=1:MAX_ITERATIONS
             % Set the current location to 0, to indicate the ant has visited it
             TempMaze(currentRow, currentColumn) = 0;
             
+            options = 0;
+            
             % Determine the probabilities for each adjacent square
             if (currentRow == 1)
                 north = 0;
             else
-               north = PherNorth(currentRow, currentColumn)^ALPHA * TempMaze(currentRow - 1, currentColumn)^BETA;
+                north = PherNorth(currentRow, currentColumn)^ALPHA * TempMaze(currentRow - 1, currentColumn)^BETA;
             end
             
             if (currentRow == size(Maze,1))
@@ -158,8 +160,14 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
-    disp('Iteration: ');
-    disp(i);
+    PherNorth = (1-EVAPORATION_RATE) .* PherNorth;
+    PherNorth = PherNorth + TempPherNorth;
+    PherWest = (1-EVAPORATION_RATE) .* PherWest;
+    PherWest = PherWest + TempPherWest;
+    PherEast = (1-EVAPORATION_RATE) .* PherEast;
+    PherEast = PherEast + TempPherEast;
+    PherSouth = (1-EVAPORATION_RATE) .* PherSouth;
+    PherSouth = PherSouth + TempPherSouth;
 end
 
 route = shortestRoute;

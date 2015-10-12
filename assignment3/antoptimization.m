@@ -2,12 +2,12 @@ clc;
 clear all;
 
 % Read the file into a matrix
-A = dlmread('medium maze.txt');
+A = dlmread('hard maze.txt');
 % Take out the top row of the matrix (which only represent the size --> see
 % file). What remains, represents the maze
 Maze = A(2:size(A,1), 1:size(A,2));
 
-fileID = fopen('medium coordinates.txt'); 
+fileID = fopen('test coordinates.txt'); 
 % Read the coordinates into a vector
 C = fscanf(fileID, '%d %s %d %s');
 fclose(fileID);
@@ -17,16 +17,16 @@ startLoc = [C(1) C(3)];
 endLoc = [C(5) C(7)];
 
 % Maximum # of iterations before the algorithm terminates
-MAX_ITERATIONS = 1000;
+MAX_ITERATIONS = 500;
 % # of ants per iteration
 ANTS_PER_ITERATION = 5;
 % This is a guess of the length of the route and is a multiplier for the
 % amounts of pheromomens that are dropped
-PHEROMONES_DROPPED = 200;
+PHEROMONES_DROPPED = 1300;
 % The rate at which pheromones evaporate
 EVAPORATION_RATE = 0.1;
 % The route length for which the algorithm is satisfied
-CONVERGENCE_CRITERION = 250;
+CONVERGENCE_CRITERION = 1000;
 % The alpha and beta of the probability function. Control the relative
 % influences of pheromones and path length
 ALPHA = 1;
@@ -73,11 +73,13 @@ for i=1:MAX_ITERATIONS
             % Set the current location to 0, to indicate the ant has visited it
             TempMaze(currentRow, currentColumn) = 0;
             
+            options = 0;
+            
             % Determine the probabilities for each adjacent square
             if (currentRow == 1)
                 north = 0;
             else
-               north = PherNorth(currentRow, currentColumn)^ALPHA * TempMaze(currentRow - 1, currentColumn)^BETA;
+                north = PherNorth(currentRow, currentColumn)^ALPHA * TempMaze(currentRow - 1, currentColumn)^BETA;
             end
             
             if (currentRow == size(Maze,1))
@@ -180,20 +182,20 @@ for i=1:MAX_ITERATIONS
         break;
     end;
     
-    PherNorth = EVAPORATION_RATE .* PherNorth;
+    PherNorth = (1-EVAPORATION_RATE) .* PherNorth;
     PherNorth = PherNorth + TempPherNorth;
-    PherWest = EVAPORATION_RATE .* PherWest;
+    PherWest = (1-EVAPORATION_RATE) .* PherWest;
     PherWest = PherWest + TempPherWest;
-    PherEast = EVAPORATION_RATE .* PherEast;
+    PherEast = (1-EVAPORATION_RATE) .* PherEast;
     PherEast = PherEast + TempPherEast;
-    PherSouth = EVAPORATION_RATE .* PherSouth;
+    PherSouth = (1-EVAPORATION_RATE) .* PherSouth;
     PherSouth = PherSouth + TempPherSouth;
     
     disp('Iteration: ');
     disp(i);
 end
 
-RESULT_FILE = 'medium_results.txt';
+RESULT_FILE = 'hard_results.txt';
 
 dlmwrite(RESULT_FILE, []);
 fileID = fopen(RESULT_FILE, 'wt'); 
