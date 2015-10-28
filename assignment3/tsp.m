@@ -153,7 +153,7 @@ for n=1: ITERATIONS
             % the fitness is immediately updated based on the routelength
             if containsRoute
                 totalRouteLength = totalRouteLength + routeLength;
-            % The route needs to be calculated
+            % The route needs to be calculated: ANT ALGO
             else
                 % An array which will contain the shortestRoute
                 shortestRoute = zeros(1, size(Maze,1) * size(Maze,2));
@@ -432,7 +432,7 @@ for j=1:productCount
     end
 end
 
-RESULT_FILE = 'product_results.txt';
+RESULT_FILE = 'tsp_results.txt';
 
 dlmwrite(RESULT_FILE, []);
 fileID = fopen(RESULT_FILE, 'wt'); 
