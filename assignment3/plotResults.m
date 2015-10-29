@@ -13,7 +13,11 @@ hardMazeResults = [1061, 1031, 1019, 1143, 1261, 1005, 937];
 insaneMazePheromones = [100, 300, 500, 700, 900, 1100, 1300];
 insaneMazeResults = [0, 0, 805, 877, 851, 0, 0];
 
+evapRate = [0.0009, 0.009, 0.09, 0.9];
+evapRateResults = [218, 237, 254, 245];
+
 %plot(easyMazePheromones, easyMazeResults)
 %plot(mediumMazePheromones, mediumMazeResults)
 %plot(hardMazePheromones, hardMazeResults)
 %plot(insaneMazePheromones, insaneMazeResults)
+%plot(evapRate, evapRateResults)
